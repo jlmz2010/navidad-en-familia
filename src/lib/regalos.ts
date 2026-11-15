@@ -6,7 +6,7 @@ export const NIVELES: { id: Nivel; label: string; emoji: string; ayuda: string; 
   { id: "muy_barato", label: "Muy barato", emoji: "🍬", ayuda: "Un detallito sencillo", clase: "bg-nivel-barato" },
   { id: "normal", label: "Normal", emoji: "🎁", ayuda: "Un regalo de los de siempre", clase: "bg-nivel-normal" },
 ];
-export const nivelInfo = (n: string) => NIVELES.find((x) => x.id === n) ?? NIVELES[2];
+export const nivelInfo = (n: string) => NIVELES.find((x) => x.id === n) ?? NIVELES[2]!;
 
 export type Deseo = { id: string; titulo: string; nivel: Nivel; link: string | null; nota: string | null };
 export type DeseoFamilia = Deseo & { persona: string; estado: "libre" | "mio" | "elegido" };

@@ -63,7 +63,7 @@ export function MiLista({ sesion }: { sesion: Sesion }) {
       })}
 
       {permitidosNuevo.length > 0 && (
-        <Button className="h-12 w-full rounded-xl text-base font-bold" onClick={() => setEdit({ titulo: "", nivel: permitidosNuevo[0], link: "", nota: "" })}>
+        <Button className="h-12 w-full rounded-xl text-base font-bold" onClick={() => setEdit({ titulo: "", nivel: permitidosNuevo[0]!, link: "", nota: "" })}>
           <Plus className="h-5 w-5" /> Agregar deseo
         </Button>
       )}
