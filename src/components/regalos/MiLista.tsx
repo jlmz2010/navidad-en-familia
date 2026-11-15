@@ -40,7 +40,7 @@ export function MiLista({ sesion }: { sesion: Sesion }) {
     <section className="space-y-4">
       <div className="rounded-2xl bg-muted p-4 text-sm">
         {faltan.length ? (
-          <p>Te faltan <b>{faltan.length}</b> deseo{faltan.length > 1 ? "s" : ""}: uno <b>{faltan.map((f) => f.label).join(", ")}</b>. Puedes agregar un 4º de cualquier nivel si quieres.</p>
+          <p>Te faltan <b>{faltan.length}</b> deseo{faltan.length > 1 ? "s" : ""} (uno de cada nivel: <b>{faltan.map((f) => f.label).join(" y ")}</b>). Puedes agregar un 4º de cualquier nivel si quieres.</p>
         ) : lista.length < 4 ? (
           <p>¡Tu lista está completa! 🎉 Si se te antoja, agrega un 4º deseo de cualquier nivel.</p>
         ) : <p>¡Tu lista está completa con 4 deseos! 🎉</p>}
