@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { entrar, type Sesion } from "@/lib/regalos";
 
-export function Entrada({ onEntrar, nombreInicial }: { onEntrar: (s: Sesion) => void; nombreInicial?: string }) {
+export function Entrada({ onEntrar, nombreInicial }: { onEntrar: (s: Sesion) => void; nombreInicial?: string | undefined }) {
   const [clave, setClave] = useState("");
   const [nombre, setNombre] = useState(nombreInicial ?? "");
   const [cargando, setCargando] = useState(false);
