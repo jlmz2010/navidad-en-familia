@@ -1,0 +1,1 @@
+DELETE FROM public.deseos WHERE persona = 'Prueba';

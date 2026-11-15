@@ -1,23 +1,53 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Entrada } from "@/components/regalos/Entrada";
+import { MiLista } from "@/components/regalos/MiLista";
+import { Familia } from "@/components/regalos/Familia";
+import { leerSesion, guardarSesion, type Sesion } from "@/lib/regalos";
 
-// The home route ships no og:image, so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Regalos en Familia · Lista de Navidad" },
+      { name: "description", content: "Arma tu lista de deseos de Navidad y mira la de tu familia. Regalar es opcional." },
+      { property: "og:title", content: "Regalos en Familia · Lista de Navidad" },
+      { property: "og:description", content: "Arma tu lista de deseos de Navidad y mira la de tu familia." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
+  const [listo, setListo] = useState(false);
+  const [sesion, setSesion] = useState<Sesion | null>(null);
+  const [nombreGuardado, setNombreGuardado] = useState<string>();
+  useEffect(() => {
+    const s = leerSesion(); setSesion(s); setNombreGuardado(s?.nombre); setListo(true);
+  }, []);
+
+  if (!listo) return <div className="min-h-screen bg-hero" />;
+  if (!sesion) return <Entrada nombreInicial={nombreGuardado} onEntrar={(s) => { guardarSesion(s); setSesion(s); }} />;
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <main className="mx-auto min-h-screen max-w-md px-4 pb-16">
+      <header className="flex items-center justify-between py-5">
+        <div>
+          <p className="text-sm text-muted-foreground">¡Hola, {sesion.nombre}! 🎄</p>
+          <h1 className="text-2xl font-bold">Regalos en Familia</h1>
+        </div>
+        <button className="text-sm font-semibold text-muted-foreground underline" onClick={() => { guardarSesion(null); setNombreGuardado(sesion.nombre); setSesion(null); }}>Salir</button>
+      </header>
+      <Tabs defaultValue="mi">
+        <TabsList className="mb-5 grid h-12 w-full grid-cols-2 rounded-xl">
+          <TabsTrigger value="mi" className="rounded-lg text-base">Mi lista</TabsTrigger>
+          <TabsTrigger value="familia" className="rounded-lg text-base">Familia</TabsTrigger>
+        </TabsList>
+        <TabsContent value="mi"><MiLista sesion={sesion} /></TabsContent>
+        <TabsContent value="familia"><Familia sesion={sesion} /></TabsContent>
+      </Tabs>
+    </main>
   );
 }

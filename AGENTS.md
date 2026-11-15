@@ -28,3 +28,5 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+- Gift list data is reached only through SECURITY DEFINER RPCs that validate the family key; tables have RLS with no policies. Why: no accounts, and my-list must never expose who reserved a wish.
