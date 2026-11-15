@@ -14,13 +14,111 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      config: {
+        Row: {
+          clave_familiar: string
+          id: number
+        }
+        Insert: {
+          clave_familiar: string
+          id?: number
+        }
+        Update: {
+          clave_familiar?: string
+          id?: number
+        }
+        Relationships: []
+      }
+      deseos: {
+        Row: {
+          apartado_por: string | null
+          creado: string
+          id: string
+          link: string | null
+          nivel: string
+          nota: string | null
+          persona: string
+          titulo: string
+        }
+        Insert: {
+          apartado_por?: string | null
+          creado?: string
+          id?: string
+          link?: string | null
+          nivel: string
+          nota?: string | null
+          persona: string
+          titulo: string
+        }
+        Update: {
+          apartado_por?: string | null
+          creado?: string
+          id?: string
+          link?: string | null
+          nivel?: string
+          nota?: string | null
+          persona?: string
+          titulo?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      _validar: {
+        Args: { p_clave: string; p_persona: string }
+        Returns: string
+      }
+      apartar: {
+        Args: { p_clave: string; p_id: string; p_persona: string }
+        Returns: boolean
+      }
+      borrar_deseo: {
+        Args: { p_clave: string; p_id: string; p_persona: string }
+        Returns: undefined
+      }
+      entrar: { Args: { p_clave: string; p_persona: string }; Returns: string }
+      familia: {
+        Args: { p_clave: string; p_persona: string }
+        Returns: {
+          estado: string
+          id: string
+          link: string
+          nivel: string
+          nota: string
+          persona: string
+          titulo: string
+        }[]
+      }
+      guardar_deseo: {
+        Args: {
+          p_clave: string
+          p_id: string
+          p_link: string
+          p_nivel: string
+          p_nota: string
+          p_persona: string
+          p_titulo: string
+        }
+        Returns: string
+      }
+      mi_lista: {
+        Args: { p_clave: string; p_persona: string }
+        Returns: {
+          creado: string
+          id: string
+          link: string
+          nivel: string
+          nota: string
+          titulo: string
+        }[]
+      }
+      soltar: {
+        Args: { p_clave: string; p_id: string; p_persona: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
