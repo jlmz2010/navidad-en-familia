@@ -1,7 +1,7 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { supabase } from "@/integrations/supabase/client";
 
-const clave = process.env.FAMILY_QA_KEY;
+const clave = process.env['FAMILY_QA_KEY'];
 const suite = clave ? describe : describe.skip;
 
 suite("reglas por RPC real (base vacía de QA)", () => {
