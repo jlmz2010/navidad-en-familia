@@ -6,24 +6,39 @@ export const NIVELES: { id: Nivel; label: string; emoji: string; ayuda: string; 
   { id: "muy_barato", label: "Muy barato", emoji: "🍬", ayuda: "Un detallito sencillo", clase: "bg-nivel-barato" },
   { id: "normal", label: "Normal", emoji: "🎁", ayuda: "Un regalo de los de siempre", clase: "bg-nivel-normal" },
 ];
-export const nivelInfo = (n: string) => NIVELES.find((x) => x.id === n) ?? NIVELES[2]!;
+export const nivelInfo = (n: string) => NIVELES.find((x) => x.id === n) ?? NIVELES.find((x) => x.id === "normal") ?? NIVELES[0];
 
 export type Deseo = { id: string; titulo: string; nivel: Nivel; link: string | null; nota: string | null };
 export type DeseoFamilia = Deseo & { persona: string; estado: "libre" | "mio" | "elegido" };
 export type Sesion = { clave: string; nombre: string };
 
 const KEY = "regalos-sesion";
+const NOMBRE_KEY = "regalos-nombre";
+export const leerNombre = () => localStorage.getItem(NOMBRE_KEY) ?? leerSesion()?.nombre;
 export const leerSesion = (): Sesion | null => {
   try { return JSON.parse(localStorage.getItem(KEY) ?? "null"); } catch { return null; }
 };
-export const guardarSesion = (s: Sesion | null) =>
-  s ? localStorage.setItem(KEY, JSON.stringify(s)) : localStorage.removeItem(KEY);
+export const guardarSesion = (s: Sesion | null) => {
+  const nombre = s?.nombre ?? leerSesion()?.nombre;
+  if (nombre) localStorage.setItem(NOMBRE_KEY, nombre);
+  if (s) localStorage.setItem(KEY, JSON.stringify(s));
+  else localStorage.removeItem(KEY);
+};
+
+export function linkSeguro(link: string | null): link is string {
+  if (!link || !/^https?:\/\/[^\s/\\?#]+([/?#][^\s\\]*)?$/i.test(link)) return false;
+  try {
+    const url = new URL(link);
+    return (url.protocol === "http:" || url.protocol === "https:") && !!url.hostname;
+  } catch { return false; }
+}
 
 const MENSAJES: Record<string, string> = {
   CLAVE_INVALIDA: "Esa clave no coincide. Pídesela a alguien de la familia 😊",
   NOMBRE_INVALIDO: "Escribe tu nombre (de 2 a 40 letras).",
   MAXIMO_4: "Ya tienes 4 deseos, ¡es el máximo!",
   FALTA_NIVEL: "Tus primeros 3 deseos van uno de cada nivel. Elige el nivel que te falta.",
+  LINK_INVALIDO: "El link debe comenzar con http:// o https:// y tener una dirección válida.",
   NO_ENCONTRADO: "No encontramos ese deseo.",
 };
 function err(e: { message: string } | null) {
@@ -68,7 +83,6 @@ export async function soltar(s: Sesion, id: string) {
 export function nivelesPermitidos(lista: { nivel: Nivel }[]): Nivel[] {
   const usados = new Set(lista.map((d) => d.nivel));
   const faltan = NIVELES.map((n) => n.id).filter((n) => !usados.has(n));
-  const libres = 4 - lista.length;
-  if (libres <= 0) return [];
-  return faltan.length >= libres ? faltan : NIVELES.map((n) => n.id);
+  if (lista.length >= 4) return [];
+  return lista.length < 3 || faltan.length > 0 ? faltan : NIVELES.map((n) => n.id);
 }
