@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { NIVELES, nivelInfo, nivelesPermitidos, miLista, guardarDeseo, borrarDeseo, type Deseo, type Nivel, type Sesion } from "@/lib/regalos";
+import { NIVELES, nivelInfo, nivelesPermitidos, linkSeguro, miLista, guardarDeseo, borrarDeseo, type Deseo, type Nivel, type Sesion } from "@/lib/regalos";
 
 type Borrador = { id?: string; titulo: string; nivel: Nivel; link: string; nota: string };
 
@@ -27,6 +27,7 @@ export function MiLista({ sesion }: { sesion: Sesion }) {
 
   async function guardar(e: React.FormEvent) {
     e.preventDefault(); if (!edit) return;
+    if (edit.link.trim() && !linkSeguro(edit.link.trim())) { toast.error("El link debe comenzar con http:// o https:// y tener una dirección válida."); return; }
     setGuardando(true);
     try { await guardarDeseo(sesion, edit); toast.success("¡Listo, guardado! ✨"); setEdit(null); cargar(); }
     catch (e) { toast.error((e as Error).message); } finally { setGuardando(false); }
@@ -37,7 +38,7 @@ export function MiLista({ sesion }: { sesion: Sesion }) {
   }
 
   return (
-    <section className="space-y-4">
+    <section className="min-w-0 space-y-4 break-words [overflow-wrap:anywhere]">
       <div className="rounded-2xl bg-muted p-4 text-sm">
         {faltan.length ? (
           <p>Te faltan <b>{faltan.length}</b> deseo{faltan.length > 1 ? "s" : ""} (uno de cada nivel: <b>{faltan.map((f) => f.label).join(" y ")}</b>). Puedes agregar un 4º de cualquier nivel si quieres.</p>
@@ -48,12 +49,13 @@ export function MiLista({ sesion }: { sesion: Sesion }) {
 
       {lista.map((d) => {
         const n = nivelInfo(d.nivel);
+        if (!n) return null;
         return (
-          <article key={d.id} className="rounded-2xl border bg-card p-4 shadow-soft">
+          <article key={d.id} className="min-w-0 rounded-2xl border bg-card p-4 shadow-soft">
             <span className={`inline-block rounded-full px-3 py-1 text-xs font-bold ${n.clase}`}>{n.emoji} {n.label}</span>
             <h3 className="mt-2 text-lg font-semibold">{d.titulo}</h3>
             {d.nota && <p className="mt-1 text-sm text-muted-foreground">{d.nota}</p>}
-            {d.link && <a href={d.link} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-primary underline">Ver link <ExternalLink className="h-3 w-3" /></a>}
+            {linkSeguro(d.link) && <a href={d.link} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-w-0 max-w-full items-center gap-1 break-words text-sm font-semibold text-primary underline">Ver link <ExternalLink className="h-3 w-3 shrink-0" /></a>}
             <div className="mt-3 flex gap-2">
               <Button variant="outline" size="sm" onClick={() => setEdit({ id: d.id, titulo: d.titulo, nivel: d.nivel, link: d.link ?? "", nota: d.nota ?? "" })}><Pencil className="h-4 w-4" /> Editar</Button>
               <Button variant="ghost" size="sm" onClick={() => borrar(d)}><Trash2 className="h-4 w-4" /> Borrar</Button>
@@ -63,7 +65,7 @@ export function MiLista({ sesion }: { sesion: Sesion }) {
       })}
 
       {permitidosNuevo.length > 0 && (
-        <Button className="h-12 w-full rounded-xl text-base font-bold" onClick={() => setEdit({ titulo: "", nivel: permitidosNuevo[0]!, link: "", nota: "" })}>
+        <Button className="h-12 w-full rounded-xl text-base font-bold" onClick={() => { const nivel = permitidosNuevo[0]; if (nivel) setEdit({ titulo: "", nivel, link: "", nota: "" }); }}>
           <Plus className="h-5 w-5" /> Agregar deseo
         </Button>
       )}

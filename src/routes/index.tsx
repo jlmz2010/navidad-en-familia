@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { Entrada } from "@/components/regalos/Entrada";
 import { MiLista } from "@/components/regalos/MiLista";
 import { Familia } from "@/components/regalos/Familia";
-import { leerSesion, guardarSesion, type Sesion } from "@/lib/regalos";
+import { leerSesion, leerNombre, guardarSesion, type Sesion } from "@/lib/regalos";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,7 +26,7 @@ function Index() {
   const [sesion, setSesion] = useState<Sesion | null>(null);
   const [nombreGuardado, setNombreGuardado] = useState<string>();
   useEffect(() => {
-    const s = leerSesion(); setSesion(s); setNombreGuardado(s?.nombre); setListo(true);
+    const s = leerSesion(); setSesion(s); setNombreGuardado(leerNombre()); setListo(true);
   }, []);
 
   if (!listo) return <div className="min-h-screen bg-hero" />;
@@ -33,12 +34,12 @@ function Index() {
 
   return (
     <main className="mx-auto min-h-screen max-w-md px-4 pb-16">
-      <header className="flex items-center justify-between py-5">
-        <div>
+      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 py-5">
+        <div className="min-w-0 break-words">
           <p className="text-sm text-muted-foreground">¡Hola, {sesion.nombre}! 🎄</p>
           <h1 className="text-2xl font-bold">Regalos en Familia</h1>
         </div>
-        <button className="text-sm font-semibold text-muted-foreground underline" onClick={() => { guardarSesion(null); setNombreGuardado(sesion.nombre); setSesion(null); }}>Salir</button>
+        <Button variant="link" className="shrink-0 text-sm font-semibold text-muted-foreground underline" onClick={() => { guardarSesion(null); setNombreGuardado(sesion.nombre); setSesion(null); }}>Salir</Button>
       </header>
       <Tabs defaultValue="mi">
         <TabsList className="mb-5 grid h-12 w-full grid-cols-2 rounded-xl">

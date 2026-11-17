@@ -30,3 +30,5 @@ use the editor.
 <!-- LOVABLE:END -->
 
 - Gift list data is reached only through SECURITY DEFINER RPCs that validate the family key; tables have RLS with no policies. Why: no accounts, and my-list must never expose who reserved a wish.
+- Keep the remembered name in separate browser storage from the family session; signing out must remove the session without losing the name.
+- Validate wish levels and HTTP(S) links in the keyed write RPC, and filter clickable links in both list views; client checks alone cannot protect direct calls.

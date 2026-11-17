@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { familia, apartar, soltar, nivelInfo, type DeseoFamilia, type Sesion } from "@/lib/regalos";
+import { familia, apartar, soltar, nivelInfo, linkSeguro, type DeseoFamilia, type Sesion } from "@/lib/regalos";
 
 export function Familia({ sesion }: { sesion: Sesion }) {
   const [lista, setLista] = useState<DeseoFamilia[] | null>(null);
@@ -25,7 +25,7 @@ export function Familia({ sesion }: { sesion: Sesion }) {
   }
 
   return (
-    <section className="space-y-6">
+    <section className="min-w-0 space-y-6 break-words [overflow-wrap:anywhere]">
       <p className="rounded-2xl bg-muted p-4 text-sm">Si te late regalarle algo a alguien, apártalo aquí para no repetir. Si no, ¡no pasa nada! Lo importante es estar juntos 💛</p>
       {Object.entries(grupos).map(([persona, deseos]) => (
         <div key={persona}>
@@ -33,13 +33,14 @@ export function Familia({ sesion }: { sesion: Sesion }) {
           <div className="space-y-3">
             {deseos.map((d) => {
               const n = nivelInfo(d.nivel);
+              if (!n) return null;
               const elegido = d.estado === "elegido";
               return (
-                <article key={d.id} className={`rounded-2xl border p-4 ${elegido ? "bg-muted text-muted-foreground" : "bg-card shadow-soft"}`}>
+                <article key={d.id} className={`min-w-0 rounded-2xl border p-4 ${elegido ? "bg-muted text-muted-foreground" : "bg-card shadow-soft"}`}>
                   <span className={`inline-block rounded-full px-3 py-1 text-xs font-bold ${elegido ? "bg-border" : n.clase}`}>{n.emoji} {n.label}</span>
                   <h3 className={`mt-2 text-lg font-semibold ${elegido ? "line-through" : ""}`}>{d.titulo}</h3>
                   {d.nota && <p className="mt-1 text-sm text-muted-foreground">{d.nota}</p>}
-                  {d.link && !elegido && <a href={d.link} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-primary underline">Ver link <ExternalLink className="h-3 w-3" /></a>}
+                  {linkSeguro(d.link) && !elegido && <a href={d.link} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-w-0 max-w-full items-center gap-1 break-words text-sm font-semibold text-primary underline">Ver link <ExternalLink className="h-3 w-3 shrink-0" /></a>}
                   <div className="mt-3">
                     {elegido ? <p className="text-sm font-semibold">Ya elegido</p>
                       : d.estado === "mio" ? (
