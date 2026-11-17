@@ -1,0 +1,123 @@
+import { useState } from "react";
+import { toast } from "sonner";
+import { Eye, EyeOff, Copy } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+import { MENSAJES_CIRCULO, NOMBRE_MAX, linkCirculo, textoInvitacion, textoPin, urlWhatsApp, validarNombreCirculo, validarPin } from "@/lib/circulo";
+
+type Listo = { nombre: string; pin: string; token: string; link: string };
+
+function Explicacion() {
+  return (
+    <ul className="space-y-1 text-sm text-muted-foreground">
+      <li>🎁 Cada quien pone 3 deseos, uno de cada nivel.</li>
+      <li>🤫 Puedes elegir regalar el deseo de otra persona; nadie ve si sus deseos fueron elegidos.</li>
+      <li>💛 Regalar es opcional, aquí no hay presión.</li>
+    </ul>
+  );
+}
+
+function Dato({ titulo, valor, ayuda }: { titulo: string; valor: string; ayuda?: string }) {
+  async function copiar() {
+    try { await navigator.clipboard.writeText(valor); toast.success("¡Copiado!"); }
+    catch { toast.error("No se pudo copiar; mantén presionado el texto para copiarlo."); }
+  }
+  return (
+    <div className="min-w-0 space-y-2">
+      <p className="text-sm font-semibold">{titulo}</p>
+      <div className="flex min-w-0 items-start gap-2">
+        <p className="min-w-0 flex-1 select-all break-words rounded-xl bg-muted px-3 py-2 font-mono text-sm [overflow-wrap:anywhere]">{valor}</p>
+        <Button type="button" variant="outline" size="icon" className="h-10 w-10 shrink-0 rounded-xl" onClick={copiar} aria-label={`Copiar ${titulo.toLowerCase()}`}>
+          <Copy className="h-4 w-4" />
+        </Button>
+      </div>
+      {ayuda && <p className="text-sm text-muted-foreground">{ayuda}</p>}
+    </div>
+  );
+}
+
+export function CrearCirculo() {
+  const [nombre, setNombre] = useState("");
+  const [pin, setPin] = useState("");
+  const [repetir, setRepetir] = useState("");
+  const [ver, setVer] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [cargando, setCargando] = useState(false);
+  const [listo, setListo] = useState<Listo | null>(null);
+
+  async function enviar(e: React.FormEvent) {
+    e.preventDefault();
+    const err = validarNombreCirculo(nombre) ?? validarPin(pin, repetir);
+    if (err) { setError(MENSAJES_CIRCULO[err] ?? null); return; }
+    setError(null); setCargando(true);
+    try {
+      const { data, error: rpcError } = await supabase.rpc("crear_circulo", { p_nombre: nombre.trim(), p_pin: pin });
+      if (rpcError) { setError(MENSAJES_CIRCULO.RED ?? null); return; }
+      const r = data as { ok?: boolean; error?: string; codigo?: string; admin_token?: string } | null;
+      if (!r?.ok || !r.codigo || !r.admin_token) {
+        setError(MENSAJES_CIRCULO[r?.error ?? ""] ?? "Algo salió mal. Intenta de nuevo en un momento."); return;
+      }
+      setListo({ nombre: nombre.trim(), pin, token: r.admin_token, link: linkCirculo(window.location.origin, import.meta.env.BASE_URL, r.codigo) });
+      setPin(""); setRepetir("");
+    } catch { setError(MENSAJES_CIRCULO.RED ?? null); }
+    finally { setCargando(false); }
+  }
+
+  return (
+    <main className="flex min-h-screen flex-col bg-hero px-5 pb-10 pt-16 text-primary-foreground">
+      <div className="mx-auto w-full min-w-0 max-w-sm">
+        <p className="text-5xl">🎄</p>
+        <h1 className="mt-4 break-words text-4xl font-bold leading-tight">{listo ? "¡Tu círculo está listo!" : "Crea tu círculo de regalos"}</h1>
+        <p className="mt-3 break-words text-lg opacity-90 [overflow-wrap:anywhere]">
+          {listo ? `"${listo.nombre}" ya existe. Guarda estos datos: solo se muestran esta vez.` : "Un espacio privado para que tu familia comparta sus deseos de Navidad."}
+        </p>
+
+        {listo ? (
+          <section className="mt-10 min-w-0 space-y-5 rounded-3xl bg-card p-6 text-card-foreground shadow-soft">
+            <Dato titulo="Link del círculo" valor={listo.link} ayuda="Compártelo con tu familia." />
+            <Dato titulo="PIN" valor={listo.pin} ayuda="Mándalo por separado del link." />
+            <div className="rounded-2xl border-2 border-primary/40 p-3">
+              <Dato titulo="Clave de administrador" valor={listo.token} ayuda="⚠️ Guárdala en un lugar seguro: no se puede recuperar y no la volverás a ver." />
+            </div>
+            <div className="space-y-3">
+              <Button asChild className="h-12 w-full rounded-xl text-base font-bold">
+                <a href={urlWhatsApp(textoInvitacion(listo.nombre, listo.link))} target="_blank" rel="noopener noreferrer">Enviar link por WhatsApp</a>
+              </Button>
+              <Button asChild variant="outline" className="h-12 w-full rounded-xl text-base font-bold">
+                <a href={urlWhatsApp(textoPin(listo.pin))} target="_blank" rel="noopener noreferrer">Enviar el PIN aparte por WhatsApp</a>
+              </Button>
+            </div>
+            <Explicacion />
+          </section>
+        ) : (
+          <form onSubmit={enviar} noValidate className="mt-10 min-w-0 space-y-5 rounded-3xl bg-card p-6 text-card-foreground shadow-soft">
+            <div className="space-y-2">
+              <Label htmlFor="nombre-circulo">Nombre del círculo</Label>
+              <Input id="nombre-circulo" value={nombre} onChange={(e) => setNombre(e.target.value)} maxLength={NOMBRE_MAX} autoComplete="off" className="h-12 text-base" placeholder="Ej. Navidad en familia" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="pin">PIN</Label>
+              <div className="relative">
+                <Input id="pin" type={ver ? "text" : "password"} value={pin} onChange={(e) => setPin(e.target.value)} autoComplete="new-password" className="h-12 pr-12 text-base" placeholder="Mínimo 6 caracteres" />
+                <button type="button" onClick={() => setVer(!ver)} className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-muted-foreground" aria-label={ver ? "Ocultar PIN" : "Mostrar PIN"}>
+                  {ver ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="pin2">Repite el PIN</Label>
+              <Input id="pin2" type={ver ? "text" : "password"} value={repetir} onChange={(e) => setRepetir(e.target.value)} autoComplete="new-password" className="h-12 text-base" />
+            </div>
+            {error && <p role="alert" className="break-words text-sm font-semibold text-destructive">{error}</p>}
+            <Button type="submit" disabled={cargando} className="h-12 w-full rounded-xl text-base font-bold">
+              {cargando ? "Creando…" : "Crear círculo"}
+            </Button>
+            <Explicacion />
+          </form>
+        )}
+      </div>
+    </main>
+  );
+}
