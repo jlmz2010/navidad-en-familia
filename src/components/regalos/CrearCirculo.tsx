@@ -54,14 +54,14 @@ export function CrearCirculo() {
     setError(null); setCargando(true);
     try {
       const { data, error: rpcError } = await supabase.rpc("crear_circulo", { p_nombre: nombre.trim(), p_pin: pin });
-      if (rpcError) { setError(MENSAJES_CIRCULO.RED ?? null); return; }
+      if (rpcError) { setError(MENSAJES_CIRCULO['RED'] ?? null); return; }
       const r = data as { ok?: boolean; error?: string; codigo?: string; admin_token?: string } | null;
       if (!r?.ok || !r.codigo || !r.admin_token) {
         setError(MENSAJES_CIRCULO[r?.error ?? ""] ?? "Algo salió mal. Intenta de nuevo en un momento."); return;
       }
       setListo({ nombre: nombre.trim(), pin, token: r.admin_token, link: linkCirculo(window.location.origin, import.meta.env.BASE_URL, r.codigo) });
       setPin(""); setRepetir("");
-    } catch { setError(MENSAJES_CIRCULO.RED ?? null); }
+    } catch { setError(MENSAJES_CIRCULO['RED'] ?? null); }
     finally { setCargando(false); }
   }
 
