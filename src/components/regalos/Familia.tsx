@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { familia, apartar, soltar, nivelInfo, linkSeguro, type DeseoFamilia, type Sesion } from "@/lib/regalos";
 
 export function Familia({ sesion }: { sesion: Sesion }) {
   const [lista, setLista] = useState<DeseoFamilia[] | null>(null);
   const [ocupado, setOcupado] = useState<string | null>(null);
+  const [confirmar, setConfirmar] = useState<DeseoFamilia | null>(null);
   const cargar = () => familia(sesion).then(setLista).catch((e) => toast.error(e.message));
   useEffect(() => { cargar(); }, []);
 
@@ -19,7 +21,13 @@ export function Familia({ sesion }: { sesion: Sesion }) {
     setOcupado(d.id);
     try {
       if (d.estado === "mio") { await soltar(sesion, d.id); toast("Listo, quedó libre otra vez."); }
-      else { await apartar(sesion, d.id); toast.success("¡Qué bonito! Ya es tuyo 🎁"); }
+      else {
+        await apartar(sesion, d.id);
+        setConfirmar(null);
+        toast.success("¡Qué bonito! Ya es tuyo 🎁", { duration: 5000, action: { label: "Deshacer", onClick: () => {
+          void soltar(sesion, d.id).then(() => { toast("Listo, quedó libre otra vez."); return cargar(); }).catch((e) => toast.error(e.message));
+        } } });
+      }
     } catch (e) { toast.error((e as Error).message); }
     await cargar(); setOcupado(null);
   }
@@ -48,7 +56,7 @@ export function Familia({ sesion }: { sesion: Sesion }) {
                           <p className="text-sm font-semibold text-secondary">✓ Tú lo regalas</p>
                           <Button variant="ghost" size="sm" disabled={ocupado === d.id} onClick={() => accion(d)}>Deshacer</Button>
                         </div>
-                      ) : <Button variant="secondary" disabled={ocupado === d.id} onClick={() => accion(d)} className="w-full rounded-xl font-bold">Yo lo regalo</Button>}
+                       ) : <Button variant="secondary" disabled={ocupado === d.id} onClick={() => setConfirmar(d)} className="w-full rounded-xl font-bold">Yo lo regalo</Button>}
                   </div>
                 </article>
               );
@@ -56,6 +64,13 @@ export function Familia({ sesion }: { sesion: Sesion }) {
           </div>
         </div>
       ))}
+      <Dialog open={!!confirmar} onOpenChange={(o) => { if (!o && !ocupado) setConfirmar(null); }}>
+        <DialogContent className="max-w-sm rounded-3xl">
+          <DialogHeader><DialogTitle className="break-words [overflow-wrap:anywhere]">¿Quieres regalarle esto a {confirmar?.persona}?</DialogTitle><DialogDescription className="break-words [overflow-wrap:anywhere]">{confirmar?.titulo}</DialogDescription></DialogHeader>
+          <Button disabled={!!ocupado} onClick={() => { if (confirmar) void accion(confirmar); }}>Sí, lo regalo</Button>
+          <Button variant="outline" disabled={!!ocupado} onClick={() => setConfirmar(null)}>Cancelar</Button>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

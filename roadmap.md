@@ -3,3 +3,5 @@
 - [x] Ejecutar todas las pruebas y QA con Ana, Beto y Cata; limpiar y verificar datos, clave y compilación.
 - [x] F2.1: aplicar migración aditiva de círculos privados y compatibilidad de RPC actuales.
 - [x] F2.1: probar con SQL seguridad, límites, aislamiento y acceso publicado; limpiar datos de prueba.
+- [x] F2.3: entrada y sesión por círculo, listas aisladas y confirmación con Deshacer.
+- [x] F2.3: pruebas automáticas y pantalla con dos círculos; limpieza y conteo original.

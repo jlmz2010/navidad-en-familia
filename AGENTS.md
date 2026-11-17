@@ -33,3 +33,5 @@ use the editor.
 - Keep the remembered name in separate browser storage from the family session; signing out must remove the session without losing the name.
 - Validate wish levels and HTTP(S) links in the keyed write RPC, and filter clickable links in both list views; client checks alone cannot protect direct calls.
 - Circle RPCs validate normalized PINs and persist failed attempts before any exception-catching write block; legacy RPCs remain scoped to the marked original circle. Why: wrong PINs must advance lockout counters without exposing other circles or breaking the published app.
+- Frontend gift reads and writes use only circle RPCs; adapt their actual `deseos` JSON field centrally in regalos.ts. Why: no cross-circle access or reservation disclosure.
+- Session/identity helpers live in sesion-circulo.ts; read hashes and storage only after hydration or in handlers, discard legacy sessions, and notify the root on invalid saved credentials. Why: SSR safety and one consistent sign-out path.

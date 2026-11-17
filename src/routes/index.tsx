@@ -5,15 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Entrada } from "@/components/regalos/Entrada";
 import { MiLista } from "@/components/regalos/MiLista";
 import { Familia } from "@/components/regalos/Familia";
-import { leerSesion, leerNombre, guardarSesion, type Sesion } from "@/lib/regalos";
+import { escucharSesionInvalida } from "@/lib/regalos";
+import { leerSesion, leerIdentidad, guardarSesion, descartarSesionVieja, type Identidad, type Sesion } from "@/lib/sesion-circulo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Regalos en Familia · Lista de Navidad" },
-      { name: "description", content: "Arma tu lista de deseos de Navidad y mira la de tu familia. Regalar es opcional." },
-      { property: "og:title", content: "Regalos en Familia · Lista de Navidad" },
-      { property: "og:description", content: "Arma tu lista de deseos de Navidad y mira la de tu familia." },
+      { title: "Navidad en Familia · Tu círculo de regalos" },
+      { name: "description", content: "Entra a tu círculo privado con su link y PIN para compartir deseos de Navidad. Regalar es opcional." },
+      { property: "og:title", content: "Navidad en Familia · Tu círculo de regalos" },
+      { property: "og:description", content: "Comparte tus deseos de Navidad en un círculo privado, sin cuentas y sin presión." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -24,22 +25,29 @@ export const Route = createFileRoute("/")({
 function Index() {
   const [listo, setListo] = useState(false);
   const [sesion, setSesion] = useState<Sesion | null>(null);
-  const [nombreGuardado, setNombreGuardado] = useState<string>();
+  const [identidad, setIdentidad] = useState<Identidad>({ nombre: "", inicial: "" });
+  const [aviso, setAviso] = useState<string | null>(null);
   useEffect(() => {
-    const s = leerSesion(); setSesion(s); setNombreGuardado(leerNombre()); setListo(true);
+    const vieja = descartarSesionVieja();
+    if (vieja) { guardarSesion(null); setAviso("Ahora se entra con el link del círculo y su PIN"); }
+    else setSesion(leerSesion());
+    setIdentidad(leerIdentidad()); setListo(true);
+    return escucharSesionInvalida((mensaje) => {
+      guardarSesion(null); setIdentidad(leerIdentidad()); setSesion(null); setAviso(mensaje);
+    });
   }, []);
 
   if (!listo) return <div className="min-h-screen bg-hero" />;
-  if (!sesion) return <Entrada nombreInicial={nombreGuardado} onEntrar={(s) => { guardarSesion(s); setSesion(s); }} />;
+  if (!sesion) return <Entrada identidad={identidad} aviso={aviso} onEntrar={(s) => { guardarSesion(s); setAviso(null); setSesion(s); }} />;
 
   return (
     <main className="mx-auto min-h-screen max-w-md px-4 pb-16">
       <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 py-5">
         <div className="min-w-0 break-words">
-          <p className="text-sm text-muted-foreground">¡Hola, {sesion.nombre}! 🎄</p>
-          <h1 className="text-2xl font-bold">Regalos en Familia</h1>
+          <p className="text-sm text-muted-foreground">¡Hola, {sesion.persona}! 🎄</p>
+          <h1 className="text-2xl font-bold [overflow-wrap:anywhere]">{sesion.nombreCirculo}</h1>
         </div>
-        <Button variant="link" className="shrink-0 text-sm font-semibold text-muted-foreground underline" onClick={() => { guardarSesion(null); setNombreGuardado(sesion.nombre); setSesion(null); }}>Salir</Button>
+        <Button variant="link" className="shrink-0 text-sm font-semibold text-muted-foreground underline" onClick={() => { guardarSesion(null); setIdentidad(leerIdentidad()); setSesion(null); setAviso(null); window.history.replaceState(null, "", window.location.pathname + window.location.search); }}>Salir</Button>
       </header>
       <Tabs defaultValue="mi">
         <TabsList className="mb-5 grid h-12 w-full grid-cols-2 rounded-xl">

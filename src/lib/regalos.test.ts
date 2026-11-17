@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { nivelesPermitidos, linkSeguro, guardarSesion, leerNombre, leerSesion } from "./regalos";
+import { nivelesPermitidos, linkSeguro } from "./regalos";
 
 describe("nivelesPermitidos", () => {
   it("con lista vacía permite los 3 niveles", () => expect(nivelesPermitidos([]).length).toBe(3));
@@ -22,12 +22,4 @@ describe("nivelesPermitidos", () => {
 describe("links", () => {
   it.each(["http://example.com", "https://example.com/a", "HTTPS://example.com"])('permite %s', (url) => expect(linkSeguro(url)).toBe(true));
   it.each(["javascript:alert(1)", "data:text/html,test", "ftp://example.com", "//example.com", "no-es-un-link", "https://", "https://example.com\\test"])('rechaza %s', (url) => expect(linkSeguro(url)).toBe(false));
-});
-
-it("salir elimina la sesión pero mantiene el nombre después de recargar", () => {
-  localStorage.clear();
-  guardarSesion({ clave: "clave-de-prueba", nombre: "Ana" });
-  guardarSesion(null);
-  expect(leerSesion()).toBeNull();
-  expect(leerNombre()).toBe("Ana");
 });

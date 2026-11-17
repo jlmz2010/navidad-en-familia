@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Eye, EyeOff, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { MENSAJES_CIRCULO, NOMBRE_MAX, linkCirculo, textoInvitacion, textoPin, urlWhatsApp, validarNombreCirculo, validarPin } from "@/lib/circulo";
 
-type Listo = { nombre: string; pin: string; token: string; link: string };
+type Listo = { nombre: string; pin: string; token: string; link: string; codigo: string };
 
 function Explicacion() {
   return (
@@ -59,7 +60,7 @@ export function CrearCirculo() {
       if (!r?.ok || !r.codigo || !r.admin_token) {
         setError(MENSAJES_CIRCULO[r?.error ?? ""] ?? "Algo salió mal. Intenta de nuevo en un momento."); return;
       }
-      setListo({ nombre: nombre.trim(), pin, token: r.admin_token, link: linkCirculo(window.location.origin, import.meta.env.BASE_URL, r.codigo) });
+      setListo({ nombre: nombre.trim(), pin, token: r.admin_token, link: linkCirculo(window.location.origin, import.meta.env.BASE_URL, r.codigo), codigo: r.codigo });
       setPin(""); setRepetir("");
     } catch { setError(MENSAJES_CIRCULO['RED'] ?? null); }
     finally { setCargando(false); }
@@ -82,6 +83,7 @@ export function CrearCirculo() {
               <Dato titulo="Clave de administrador" valor={listo.token} ayuda="⚠️ Guárdala en un lugar seguro: no se puede recuperar y no la volverás a ver." />
             </div>
             <div className="space-y-3">
+              <Button asChild className="h-12 w-full rounded-xl text-base font-bold"><Link to="/" hash={`/c/${listo.codigo}`}>Entrar a mi círculo</Link></Button>
               <Button asChild className="h-12 w-full rounded-xl text-base font-bold">
                 <a href={urlWhatsApp(textoInvitacion(listo.nombre, listo.link))} target="_blank" rel="noopener noreferrer">Enviar link por WhatsApp</a>
               </Button>
