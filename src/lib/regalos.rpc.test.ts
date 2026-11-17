@@ -9,7 +9,7 @@ suite("reglas por RPC real (base vacía de QA)", () => {
   const niveles = ["sin_costo", "muy_barato", "normal"];
   async function guardar(persona: string, nivel: string, link = "", id?: string) {
     return supabase.rpc("guardar_deseo", {
-      p_clave: clave ?? "", p_persona: persona, p_id: id as string,
+      p_clave: clave ?? "", p_persona: persona, p_id: (id ?? null) as unknown as string,
       p_titulo: "QA ciclo 1.1", p_nivel: nivel, p_link: link, p_nota: "",
     });
   }
