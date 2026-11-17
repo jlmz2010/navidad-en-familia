@@ -1,3 +1,5 @@
 - [x] Corregir niveles, links, corte de palabras y persistencia del nombre.
 - [x] Revisar presencia de claves sin modificarlas ni mostrarlas.
 - [x] Ejecutar todas las pruebas y QA con Ana, Beto y Cata; limpiar y verificar datos, clave y compilación.
+- [x] F2.1: aplicar migración aditiva de círculos privados y compatibilidad de RPC actuales.
+- [x] F2.1: probar con SQL seguridad, límites, aislamiento y acceso publicado; limpiar datos de prueba.

@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      circulos: {
+        Row: {
+          admin_hash: string | null
+          bloqueado_hasta: string | null
+          codigo: string
+          creado: string
+          id: string
+          intentos_fallidos: number
+          max_miembros: number
+          nombre: string
+          pin_hash: string
+        }
+        Insert: {
+          admin_hash?: string | null
+          bloqueado_hasta?: string | null
+          codigo?: string
+          creado?: string
+          id?: string
+          intentos_fallidos?: number
+          max_miembros?: number
+          nombre: string
+          pin_hash: string
+        }
+        Update: {
+          admin_hash?: string | null
+          bloqueado_hasta?: string | null
+          codigo?: string
+          creado?: string
+          id?: string
+          intentos_fallidos?: number
+          max_miembros?: number
+          nombre?: string
+          pin_hash?: string
+        }
+        Relationships: []
+      }
       config: {
         Row: {
           clave_familiar: string
@@ -32,6 +68,7 @@ export type Database = {
       deseos: {
         Row: {
           apartado_por: string | null
+          circulo_id: string
           creado: string
           id: string
           link: string | null
@@ -42,6 +79,7 @@ export type Database = {
         }
         Insert: {
           apartado_por?: string | null
+          circulo_id?: string
           creado?: string
           id?: string
           link?: string | null
@@ -52,6 +90,7 @@ export type Database = {
         }
         Update: {
           apartado_por?: string | null
+          circulo_id?: string
           creado?: string
           id?: string
           link?: string | null
@@ -60,7 +99,15 @@ export type Database = {
           persona?: string
           titulo?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "deseos_circulo_id_fkey"
+            columns: ["circulo_id"]
+            isOneToOne: false
+            referencedRelation: "circulos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -71,15 +118,45 @@ export type Database = {
         Args: { p_clave: string; p_persona: string }
         Returns: string
       }
+      _validar_c: {
+        Args: { p_codigo: string; p_persona?: string; p_pin: string }
+        Returns: Json
+      }
       apartar: {
         Args: { p_clave: string; p_id: string; p_persona: string }
         Returns: boolean
+      }
+      apartar_c: {
+        Args: {
+          p_codigo: string
+          p_id: string
+          p_persona: string
+          p_pin: string
+        }
+        Returns: Json
       }
       borrar_deseo: {
         Args: { p_clave: string; p_id: string; p_persona: string }
         Returns: undefined
       }
+      borrar_deseo_c: {
+        Args: {
+          p_codigo: string
+          p_id: string
+          p_persona: string
+          p_pin: string
+        }
+        Returns: Json
+      }
+      crear_circulo: {
+        Args: { p_nombre: string; p_pin: string }
+        Returns: Json
+      }
       entrar: { Args: { p_clave: string; p_persona: string }; Returns: string }
+      entrar_circulo: {
+        Args: { p_codigo: string; p_pin: string }
+        Returns: Json
+      }
       familia: {
         Args: { p_clave: string; p_persona: string }
         Returns: {
@@ -91,6 +168,10 @@ export type Database = {
           persona: string
           titulo: string
         }[]
+      }
+      familia_c: {
+        Args: { p_codigo: string; p_persona: string; p_pin: string }
+        Returns: Json
       }
       guardar_deseo: {
         Args: {
@@ -104,6 +185,19 @@ export type Database = {
         }
         Returns: string
       }
+      guardar_deseo_c: {
+        Args: {
+          p_codigo: string
+          p_id: string
+          p_link: string
+          p_nivel: string
+          p_nota: string
+          p_persona: string
+          p_pin: string
+          p_titulo: string
+        }
+        Returns: Json
+      }
       mi_lista: {
         Args: { p_clave: string; p_persona: string }
         Returns: {
@@ -115,9 +209,22 @@ export type Database = {
           titulo: string
         }[]
       }
+      mi_lista_c: {
+        Args: { p_codigo: string; p_persona: string; p_pin: string }
+        Returns: Json
+      }
       soltar: {
         Args: { p_clave: string; p_id: string; p_persona: string }
         Returns: boolean
+      }
+      soltar_c: {
+        Args: {
+          p_codigo: string
+          p_id: string
+          p_persona: string
+          p_pin: string
+        }
+        Returns: Json
       }
     }
     Enums: {
