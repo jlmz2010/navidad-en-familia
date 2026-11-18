@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { MiLista } from "@/components/regalos/MiLista";
 import { Familia } from "@/components/regalos/Familia";
 import { escucharSesionInvalida } from "@/lib/regalos";
 import { leerSesion, leerIdentidad, guardarSesion, descartarSesionVieja, type Identidad, type Sesion } from "@/lib/sesion-circulo";
+import { extraerToken, entregarToken } from "@/lib/admin-circulo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -23,19 +24,29 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const navigate = useNavigate();
   const [listo, setListo] = useState(false);
   const [sesion, setSesion] = useState<Sesion | null>(null);
   const [identidad, setIdentidad] = useState<Identidad>({ nombre: "", inicial: "" });
   const [aviso, setAviso] = useState<string | null>(null);
   useEffect(() => {
+    const detectarAdmin = () => {
+      const t = extraerToken(window.location.hash);
+      if (!t) return;
+      entregarToken(t);
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+      void navigate({ to: "/admin", replace: true });
+    };
+    detectarAdmin(); window.addEventListener("hashchange", detectarAdmin);
     const vieja = descartarSesionVieja();
     if (vieja) { guardarSesion(null); setAviso("Ahora se entra con el link del círculo y su PIN"); }
     else setSesion(leerSesion());
     setIdentidad(leerIdentidad()); setListo(true);
-    return escucharSesionInvalida((mensaje) => {
+    const cancelar = escucharSesionInvalida((mensaje) => {
       guardarSesion(null); setIdentidad(leerIdentidad()); setSesion(null); setAviso(mensaje);
     });
-  }, []);
+    return () => { cancelar(); window.removeEventListener("hashchange", detectarAdmin); };
+  }, [navigate]);
 
   if (!listo) return <div className="min-h-screen bg-hero" />;
   if (!sesion) return <Entrada identidad={identidad} aviso={aviso} onEntrar={(s) => { guardarSesion(s); setAviso(null); setSesion(s); }} />;
@@ -57,6 +68,7 @@ function Index() {
         <TabsContent value="mi"><MiLista sesion={sesion} /></TabsContent>
         <TabsContent value="familia"><Familia sesion={sesion} /></TabsContent>
       </Tabs>
+      <Button asChild variant="link" className="mt-6 text-muted-foreground"><Link to="/admin">Soy administrador</Link></Button>
     </main>
   );
 }

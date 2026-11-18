@@ -114,12 +114,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _admin_validar_c: { Args: { p_token: string }; Returns: string }
       _validar: {
         Args: { p_clave: string; p_persona: string }
         Returns: string
       }
       _validar_c: {
         Args: { p_codigo: string; p_persona?: string; p_pin: string }
+        Returns: Json
+      }
+      admin_borrar_circulo_c: {
+        Args: { p_confirmacion: string; p_token: string }
+        Returns: Json
+      }
+      admin_cambiar_pin_c: {
+        Args: { p_pin_nuevo: string; p_token: string }
+        Returns: Json
+      }
+      admin_info_c: { Args: { p_token: string }; Returns: Json }
+      admin_quitar_persona_c: {
+        Args: { p_persona: string; p_token: string }
         Returns: Json
       }
       apartar: {
@@ -211,6 +225,10 @@ export type Database = {
       }
       mi_lista_c: {
         Args: { p_codigo: string; p_persona: string; p_pin: string }
+        Returns: Json
+      }
+      reclamar_admin_c: {
+        Args: { p_codigo: string; p_pin: string }
         Returns: Json
       }
       soltar: {

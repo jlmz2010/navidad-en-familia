@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { toast } from "sonner";
-import { Eye, EyeOff, Copy } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { MENSAJES_CIRCULO, NOMBRE_MAX, linkCirculo, textoInvitacion, textoPin, urlWhatsApp, validarNombreCirculo, validarPin } from "@/lib/circulo";
+import { linkAdministrador } from "@/lib/admin-circulo";
+import { ClavesAdministrador, Dato } from "./ClavesAdministrador";
 
-type Listo = { nombre: string; pin: string; token: string; link: string; codigo: string };
+type Listo = { nombre: string; pin: string; token: string; link: string; adminLink: string; codigo: string };
 
 function Explicacion() {
   return (
@@ -17,25 +18,6 @@ function Explicacion() {
       <li>🤫 Puedes elegir regalar el deseo de otra persona; nadie ve si sus deseos fueron elegidos.</li>
       <li>💛 Regalar es opcional, aquí no hay presión.</li>
     </ul>
-  );
-}
-
-function Dato({ titulo, valor, ayuda }: { titulo: string; valor: string; ayuda?: string }) {
-  async function copiar() {
-    try { await navigator.clipboard.writeText(valor); toast.success("¡Copiado!"); }
-    catch { toast.error("No se pudo copiar; mantén presionado el texto para copiarlo."); }
-  }
-  return (
-    <div className="min-w-0 space-y-2">
-      <p className="text-sm font-semibold">{titulo}</p>
-      <div className="flex min-w-0 items-start gap-2">
-        <p className="min-w-0 flex-1 select-all break-words rounded-xl bg-muted px-3 py-2 font-mono text-sm [overflow-wrap:anywhere]">{valor}</p>
-        <Button type="button" variant="outline" size="icon" className="h-10 w-10 shrink-0 rounded-xl" onClick={copiar} aria-label={`Copiar ${titulo.toLowerCase()}`}>
-          <Copy className="h-4 w-4" />
-        </Button>
-      </div>
-      {ayuda && <p className="text-sm text-muted-foreground">{ayuda}</p>}
-    </div>
   );
 }
 
@@ -60,7 +42,7 @@ export function CrearCirculo() {
       if (!r?.ok || !r.codigo || !r.admin_token) {
         setError(MENSAJES_CIRCULO[r?.error ?? ""] ?? "Algo salió mal. Intenta de nuevo en un momento."); return;
       }
-      setListo({ nombre: nombre.trim(), pin, token: r.admin_token, link: linkCirculo(window.location.origin, import.meta.env.BASE_URL, r.codigo), codigo: r.codigo });
+      setListo({ nombre: nombre.trim(), pin, token: r.admin_token, link: linkCirculo(window.location.origin, import.meta.env.BASE_URL, r.codigo), adminLink: linkAdministrador(window.location.origin, import.meta.env.BASE_URL, r.admin_token), codigo: r.codigo });
       setPin(""); setRepetir("");
     } catch { setError(MENSAJES_CIRCULO['RED'] ?? null); }
     finally { setCargando(false); }
@@ -79,9 +61,7 @@ export function CrearCirculo() {
           <section className="mt-10 min-w-0 space-y-5 rounded-3xl bg-card p-6 text-card-foreground shadow-soft">
             <Dato titulo="Link del círculo" valor={listo.link} ayuda="Compártelo con tu familia." />
             <Dato titulo="PIN" valor={listo.pin} ayuda="Mándalo por separado del link." />
-            <div className="rounded-2xl border-2 border-primary/40 p-3">
-              <Dato titulo="Clave de administrador" valor={listo.token} ayuda="⚠️ Guárdala en un lugar seguro: no se puede recuperar y no la volverás a ver." />
-            </div>
+            <ClavesAdministrador token={listo.token} link={listo.adminLink} />
             <div className="space-y-3">
               <Button asChild className="h-12 w-full rounded-xl text-base font-bold"><Link to="/" hash={`/c/${listo.codigo}`}>Entrar a mi círculo</Link></Button>
               <Button asChild className="h-12 w-full rounded-xl text-base font-bold">

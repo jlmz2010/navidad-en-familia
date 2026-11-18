@@ -29,6 +29,13 @@
       "when": 1794937169858,
       "tag": "0003_circulos_privados_f21",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795012132326,
+      "tag": "0004_admin_circulos_f24",
+      "breakpoints": true
     }
   ]
 }

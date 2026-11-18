@@ -76,6 +76,7 @@ export function Entrada({ onEntrar, identidad, aviso }: { onEntrar: (s: Sesion) 
           </Button>
         </form>
         <Button asChild variant="outline" className="mt-5 h-12 w-full rounded-xl bg-card text-base font-bold text-card-foreground"><Link to="/nuevo"><Plus className="h-4 w-4" />Crear círculo de regalos</Link></Button>
+        <Button asChild variant="link" className="mt-3 w-full text-primary-foreground"><Link to="/admin">Soy administrador</Link></Button>
       </div>
     </main>
   );

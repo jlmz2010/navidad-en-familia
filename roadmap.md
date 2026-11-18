@@ -5,3 +5,6 @@
 - [x] F2.1: probar con SQL seguridad, límites, aislamiento y acceso publicado; limpiar datos de prueba.
 - [x] F2.3: entrada y sesión por círculo, listas aisladas y confirmación con Deshacer.
 - [x] F2.3: pruebas automáticas y pantalla con dos círculos; limpieza y conteo original.
+- [x] F2.4: funciones aditivas de administración con validación y protección del original.
+- [x] F2.4: panel, enlace en portada y claves de una sola vez, solo en memoria.
+- [x] F2.4: pruebas de helpers, RPC y pantalla; limpieza e integridad del original. Protección original inspeccionada sin reclamarla; llamada con token real no disponible por restricción.
